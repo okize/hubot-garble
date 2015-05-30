@@ -1,0 +1,37 @@
+{
+  "name": "hubot-garble",
+  "version": "1.0.0",
+  "description": "Hubot script that garbles your text",
+  "main": "index.coffee",
+  "author": {
+    "name": "Morgan Wigmanich",
+    "email": "okize123@gmail.com",
+    "url": "https://github.com/okize"
+  },
+  "keywords": [
+    "hubot",
+    "hubot-scripts",
+    "garble"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "script/test"
+  },
+  "homepage": "https://github.com/okize/hubot-garble/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/okize/hubot-garble.git"
+  },
+  "bugs": {
+    "url": "https://github.com/okize/hubot-garble/issues"
+  },
+  "dependencies": {
+    "coffee-script": "^1.9.0"
+  },
+  "devDependencies": {
+    "mocha": "^1.20.0",
+    "chai": "^1.9.0",
+    "sinon-chai": "^2.5.0",
+    "sinon": "^1.8.0"
+  }
+}
