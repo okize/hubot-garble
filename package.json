@@ -26,7 +26,8 @@
     "url": "https://github.com/okize/hubot-garble/issues"
   },
   "dependencies": {
-    "coffee-script": "^1.9.0"
+    "coffee-script": "^1.9.0",
+    "lodash": "^3.9.3"
   },
   "devDependencies": {
     "mocha": "^1.20.0",
