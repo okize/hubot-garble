@@ -1,6 +1,6 @@
 {
   "name": "hubot-garble",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Hubot script that garbles your text",
   "main": "index.coffee",
   "author": {
@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "coffee-script": "^1.9.0",
-    "lodash": "^3.9.3"
+    "lodash": "^3.9.3",
+    "request": "^2.56.0"
   },
   "devDependencies": {
     "mocha": "^1.20.0",
