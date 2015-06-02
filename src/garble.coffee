@@ -19,7 +19,6 @@
 querystring = require('querystring')
 _ = require('lodash')
 request = require('request')
-Progger = require('progger')
 languages = require('./data/languages.json')
 
 TRANSLATE_URI = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
