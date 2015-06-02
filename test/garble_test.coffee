@@ -14,5 +14,5 @@ describe 'hubot-garble', ->
 
   it 'does register a respond listener', ->
     expect(@robot.respond).to.have.been.calledWithMatch sinon.match( (val) ->
-      val.test /garble/
+      val.test /hubot garble this text/
     )
