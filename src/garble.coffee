@@ -19,16 +19,17 @@
 querystring = require('querystring')
 _ = require('lodash')
 request = require('request')
-languages = require('./data/languages.json')
 
+LANGUAGES = require('./data/languages.json')
 TRANSLATE_URI = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
 API_KEY = process.env.YANDEX_TRANSLATE_API_KEY
-SOURCE_LANGUAGE = 'en'
-DEFAULT_ITERATIONS = 4
+NATIVE_LANGUAGE = 'en'
+DEFAULT_ITERATIONS = 5
+SUPPRESS_TRANSLATION_PATH_LOG = process.env.HUBOT_GARBLE_TRANSLATION_PATH_LOG || false
 
 getRandomLanguages = (count) ->
-  # an array of all available language codes except SOURCE_LANGUAGE
-  languageCodes = _.chain(languages).pluck('code').pull(SOURCE_LANGUAGE).value()
+  # an array of all available language codes except NATIVE_LANGUAGE
+  languageCodes = _.chain(LANGUAGES).pluck('code').pull(NATIVE_LANGUAGE).value()
 
   # an array of randomly sorted languages
   randomLanguages = _.times count, () ->
@@ -36,8 +37,8 @@ getRandomLanguages = (count) ->
     _.pull(languageCodes, lang)
     lang
 
-  # add SOURCE_LANGUAGE as first and last items
-  _.chain(randomLanguages).unshift(SOURCE_LANGUAGE).push(SOURCE_LANGUAGE).value()
+  # add NATIVE_LANGUAGE as first and last items
+  _.chain(randomLanguages).unshift(NATIVE_LANGUAGE).push(NATIVE_LANGUAGE).value()
 
 getRequestString = (langFrom, langTo, text) ->
   opts =
@@ -45,6 +46,12 @@ getRequestString = (langFrom, langTo, text) ->
     lang: "#{langFrom}-#{langTo}"
     text: text
   return "#{TRANSLATE_URI}?#{querystring.stringify(opts)}"
+
+logTranslationPath = (languageCodes) ->
+  # get full language name from language code
+  languageNames = _.map languageCodes, (lang) ->
+    _.result(_.find(LANGUAGES, 'code', lang), 'language')
+  "translation path: #{languageNames.join(' -> ')}"
 
 parseResponse = (str) ->
   try
@@ -64,4 +71,7 @@ module.exports = (robot) ->
         request getRequestString(langs[2], langs[3], parseResponse(body)), (error, response, body) ->
           request getRequestString(langs[3], langs[4], parseResponse(body)), (error, response, body) ->
             request getRequestString(langs[4], langs[5], parseResponse(body)), (error, response, body) ->
-              msg.send parseResponse(body)
+              request getRequestString(langs[5], langs[6], parseResponse(body)), (error, response, body) ->
+                msg.send parseResponse(body)
+                unless SUPPRESS_TRANSLATION_PATH_LOG == 'true'
+                  msg.send logTranslationPath(langs)
