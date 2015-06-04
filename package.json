@@ -1,6 +1,6 @@
 {
   "name": "hubot-garble",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Hubot script that garbles your text",
   "main": "index.coffee",
   "author": {
