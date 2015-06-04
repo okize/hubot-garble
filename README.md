@@ -9,9 +9,17 @@ Hubot script that garbles your text
 
 ## Usage
 
-In a campfire room, type:
+In a chatroom, type:
 
     hubot garble <text>
+
+## Configuration
+
+ENV variable | Description
+--- | ---
+``YANDEX_TRANSLATE_API_KEY`` | string; a [Yandex API key](https://tech.yandex.com/keys/get/?service=trnsl) (*required*)
+``HUBOT_GARBLE_LOCAL_LANGUAGE`` | string; language code for chatroom language (optional; default is 'en')
+``HUBOT_GARBLE_TRANSLATION_PATH_LOG`` | boolean; display the translation path that text followed during garbling process (optional; default is true)
 
 ## Installation
 
