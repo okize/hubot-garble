@@ -29,32 +29,43 @@ LOCAL_LANGUAGE = process.env.HUBOT_GARBLE_LOCAL_LANGUAGE || 'en'
 SHOW_TRANSLATION_PATH = process.env.HUBOT_GARBLE_TRANSLATION_PATH_LOG || true
 DEFAULT_ITERATIONS = 5
 
-getRandomLanguages = (count) ->
-  # an array of all available language codes except LOCAL_LANGUAGE
-  languageCodes = _.chain(LANGUAGES).pluck('code').pull(LOCAL_LANGUAGE).value()
+# get full language name from a language code
+getLanguageName = (languageCode) ->
+  _.result(_.find(LANGUAGES, 'code', languageCode), 'language')
 
-  # an array of randomly sorted languages
-  randomLanguages = _.times count, () ->
+# an array of all available language codes except LOCAL_LANGUAGE
+getLanguageCodes = () ->
+  _.chain(LANGUAGES).pluck('code').pull(LOCAL_LANGUAGE).value()
+
+# an array of randomly sorted languages
+getRandomLanguages = (languageCodes, amount) ->
+  _.times amount, () ->
     lang = _.sample(languageCodes)
     _.pull(languageCodes, lang)
     lang
 
-  # add LOCAL_LANGUAGE as first and last items
-  _.chain(randomLanguages).unshift(LOCAL_LANGUAGE).push(LOCAL_LANGUAGE).value()
+# an array of languages to translate text through
+# wraps LOCAL_LANGUAGE around random assortment of languages
+getTranslationPath = (amount) ->
+  _.chain(getRandomLanguages(getLanguageCodes(), amount))
+    .unshift(LOCAL_LANGUAGE)
+    .push(LOCAL_LANGUAGE)
+    .value()
 
-getRequestString = (langFrom, langTo, text) ->
+# a string that indicates what "translation path" the text was passed through
+getTranslationPathLog = (languageCodes) ->
+  languageNames = _.map languageCodes, (code) -> getLanguageName(code)
+  "translation path: #{languageNames.join(' → ')}"
+
+# a URI that satisfies the Yandex API requirements
+getRequestURI = (langFrom, langTo, text) ->
   opts =
     key: API_KEY
     lang: "#{langFrom}-#{langTo}"
     text: text
   return "#{TRANSLATE_URI}?#{querystring.stringify(opts)}"
 
-logTranslationPath = (languageCodes) ->
-  # get full language name from language code
-  languageNames = _.map languageCodes, (lang) ->
-    _.result(_.find(LANGUAGES, 'code', lang), 'language')
-  "translation path: #{languageNames.join(' -> ')}"
-
+# a string of translated text
 parseResponse = (str) ->
   try
     return JSON.parse(str).text[0]
@@ -66,14 +77,14 @@ module.exports = (robot) ->
   robot.respond /garble (.*)/i, (msg) ->
 
     text = msg.match[1]?.trim()
-    langs = getRandomLanguages(DEFAULT_ITERATIONS)
+    langs = getTranslationPath(DEFAULT_ITERATIONS)
 
-    request getRequestString(langs[0], langs[1], text), (error, response, body) ->
-      request getRequestString(langs[1], langs[2], parseResponse(body)), (error, response, body) ->
-        request getRequestString(langs[2], langs[3], parseResponse(body)), (error, response, body) ->
-          request getRequestString(langs[3], langs[4], parseResponse(body)), (error, response, body) ->
-            request getRequestString(langs[4], langs[5], parseResponse(body)), (error, response, body) ->
-              request getRequestString(langs[5], langs[6], parseResponse(body)), (error, response, body) ->
+    request getRequestURI(langs[0], langs[1], text), (error, response, body) ->
+      request getRequestURI(langs[1], langs[2], parseResponse(body)), (error, response, body) ->
+        request getRequestURI(langs[2], langs[3], parseResponse(body)), (error, response, body) ->
+          request getRequestURI(langs[3], langs[4], parseResponse(body)), (error, response, body) ->
+            request getRequestURI(langs[4], langs[5], parseResponse(body)), (error, response, body) ->
+              request getRequestURI(langs[5], langs[6], parseResponse(body)), (error, response, body) ->
                 msg.send parseResponse(body)
                 unless SHOW_TRANSLATION_PATH == 'false'
-                  msg.send logTranslationPath(langs)
+                  msg.send getTranslationPathLog(langs)
