@@ -25,14 +25,20 @@ ENV variable | Description
 
 Add the package `hubot-garble` as a dependency in your Hubot `package.json` file.
 
-    "dependencies": {
-      "hubot-garble": "^1.0.0"
-    }
+```javascript
+"dependencies": {
+  "hubot-garble": "^1.0.0"
+}
+```
 
 Run the following command to make sure the module is installed.
 
-    $ npm install hubot-garble
+```bash
+npm install hubot-garble
+```
 
-To enable the script, add the `hubot-garble` entry to the `external-scripts.json` file (you may need to create this file).
+To enable the script, add the `hubot-garble` entry to the `external-scripts.json` file (_you may need to create this file_).
 
-    ["hubot-garble"]
+```javascript
+["hubot-garble"]
+```
