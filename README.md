@@ -11,7 +11,9 @@ Hubot script that garbles your text
 
 In a chatroom, type:
 
-    hubot garble <text>
+    hubot garble [1-9] <text>
+
+Hubot will return *garbled* text by translating the original text N number of times, where N is an optional argument between 1 and 9 (default is 5).
 
 ## Configuration
 
