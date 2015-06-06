@@ -10,10 +10,10 @@
 #   HUBOT_GARBLE_TRANSLATION_PATH_LOG     boolean; display the translation path that text followed during garbling process (optional; default is true)
 #
 # Commands:
-#   hubot garble <text> - garbles your text
+#   hubot garble [1 - 9] <text> - garbles your text by [least - most] amount (default 5)
 #
 # Notes
-#   Forgive this terrible first pass, I was in a rush
+#   None
 #
 # Author:
 #   Morgan Wigmanich <okize123@gmail.com> (https://github.com/okize)
@@ -21,7 +21,6 @@
 querystring = require('querystring')
 _ = require('lodash')
 request = require('request')
-
 LANGUAGES = require('./data/languages.json')
 TRANSLATE_URI = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
 API_KEY = process.env.YANDEX_TRANSLATE_API_KEY
@@ -37,17 +36,17 @@ getLanguageName = (languageCode) ->
 getLanguageCodes = () ->
   _.chain(LANGUAGES).pluck('code').pull(LOCAL_LANGUAGE).value()
 
-# an array of randomly sorted languages
-getRandomLanguages = (languageCodes, amount) ->
-  _.times amount, () ->
+# an array of random languages; length determined by amountOfLanguages
+getRandomLanguages = (languageCodes, amountOfLanguages) ->
+  _.times amountOfLanguages, () ->
     lang = _.sample(languageCodes)
     _.pull(languageCodes, lang)
     lang
 
 # an array of languages to translate text through
 # wraps LOCAL_LANGUAGE around random assortment of languages
-getTranslationPath = (amount) ->
-  _.chain(getRandomLanguages(getLanguageCodes(), amount))
+getTranslationPath = (amountOfLanguages) ->
+  _.chain(getRandomLanguages(getLanguageCodes(), amountOfLanguages))
     .unshift(LOCAL_LANGUAGE)
     .push(LOCAL_LANGUAGE)
     .value()
