@@ -26,7 +26,7 @@ TRANSLATE_URI = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
 API_KEY = process.env.YANDEX_TRANSLATE_API_KEY
 LOCAL_LANGUAGE = process.env.HUBOT_GARBLE_LOCAL_LANGUAGE || 'en'
 SHOW_TRANSLATION_PATH = process.env.HUBOT_GARBLE_TRANSLATION_PATH_LOG || true
-DEFAULT_ITERATIONS = 5
+DEFAULT_GARBLE_AMOUNT = 5
 
 # get full language name from a language code
 getLanguageName = (languageCode) ->
@@ -36,17 +36,17 @@ getLanguageName = (languageCode) ->
 getLanguageCodes = () ->
   _.chain(LANGUAGES).pluck('code').pull(LOCAL_LANGUAGE).value()
 
-# an array of random languages; length determined by amountOfLanguages
-getRandomLanguages = (languageCodes, amountOfLanguages) ->
-  _.times amountOfLanguages, () ->
+# an array of random languages; length determined by garbling amount
+getRandomLanguages = (languageCodes, garbleAmount) ->
+  _.times garbleAmount, () ->
     lang = _.sample(languageCodes)
     _.pull(languageCodes, lang)
     lang
 
 # an array of languages to translate text through
 # wraps LOCAL_LANGUAGE around random assortment of languages
-getTranslationPath = (amountOfLanguages) ->
-  _.chain(getRandomLanguages(getLanguageCodes(), amountOfLanguages))
+getTranslationPath = (garbleAmount) ->
+  _.chain(getRandomLanguages(getLanguageCodes(), garbleAmount))
     .unshift(LOCAL_LANGUAGE)
     .push(LOCAL_LANGUAGE)
     .value()
@@ -76,14 +76,26 @@ module.exports = (robot) ->
   robot.respond /garble (.*)/i, (msg) ->
 
     text = msg.match[1]?.trim()
-    langs = getTranslationPath(DEFAULT_ITERATIONS)
+    regex = /^\d+\s*/
+    garbleAmount = regex.exec(text)
 
-    request getRequestURI(langs[0], langs[1], text), (error, response, body) ->
-      request getRequestURI(langs[1], langs[2], parseResponse(body)), (error, response, body) ->
-        request getRequestURI(langs[2], langs[3], parseResponse(body)), (error, response, body) ->
-          request getRequestURI(langs[3], langs[4], parseResponse(body)), (error, response, body) ->
-            request getRequestURI(langs[4], langs[5], parseResponse(body)), (error, response, body) ->
-              request getRequestURI(langs[5], langs[6], parseResponse(body)), (error, response, body) ->
-                msg.send parseResponse(body)
-                unless SHOW_TRANSLATION_PATH == 'false'
-                  msg.send getTranslationPathLog(langs)
+    if garbleAmount?
+      amount = parseInt(garbleAmount[0], 10)
+      garbleAmount = if (1 <= amount <= 9) then amount else DEFAULT_GARBLE_AMOUNT
+      text = text.replace(regex, '')
+    else
+      garbleAmount = DEFAULT_GARBLE_AMOUNT
+
+    langs = getTranslationPath(garbleAmount)
+
+    if text?.length
+
+      request getRequestURI(langs[0], langs[1], text), (error, response, body) ->
+        request getRequestURI(langs[1], langs[2], parseResponse(body)), (error, response, body) ->
+          request getRequestURI(langs[2], langs[3], parseResponse(body)), (error, response, body) ->
+            request getRequestURI(langs[3], langs[4], parseResponse(body)), (error, response, body) ->
+              request getRequestURI(langs[4], langs[5], parseResponse(body)), (error, response, body) ->
+                request getRequestURI(langs[5], langs[6], parseResponse(body)), (error, response, body) ->
+                  msg.send parseResponse(body)
+                  unless SHOW_TRANSLATION_PATH == 'false'
+                    msg.send getTranslationPathLog(langs)
