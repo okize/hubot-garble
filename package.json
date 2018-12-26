@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.3",
-    "coffee-script": "^1.9.3",
+    "coffeescript": "^1.12.7",
     "lodash": "^3.9.3",
     "request": "^2.88.0"
   },
